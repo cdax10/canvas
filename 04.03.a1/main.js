@@ -46,39 +46,24 @@ function accionesJuego(){
         {
             y=y;
             x=x;
-        }
-            
-  
-    //verificaremos si el player ha salido del canvas, en cuyo caso, haremos que aparezca por el otro lado:
-    
-    if(x>=canvas.width)
-    {
-        x=0;
-    }
-
-    else if(x<=0)
-    {
-        x=canvas.width ;
-    }
-    
-    else if(y>=canvas.height)
-    {
-        y=0;
-    }
-
-    else if(y<=0)
-    {
-        y=canvas.height;
-    }
-    
-    
+        }  
 
 }
 function pintarLienzo(lienzo){
     lienzo.fillStyle="#F7F9FA"; //le ponemos un color al lienzo
     lienzo.fillRect(0,0,canvas.width,canvas.height); //Dibujamos el lienzo
     lienzo.fillStyle='#0f0';
-    lienzo.fillRect(x,y,10,10); //Dibujamos el jugador: va por posición x,y y es de 10x10       
+    lienzo.fillRect(x,y,10,10); //Dibujamos el jugador: va por posición x,y y es de 10x10
+    //
+    if(x>=canvas.width || x<=0 || y>=canvas.height || y<=0)
+    {
+        lienzo.fillStyle='#FF0000';
+        lienzo.font = "30px Georgia";
+        lienzo.fillText("GAMEOVER", (canvas.width/2)-90, canvas.height/2);
+        //lienzo.fill();
+    }
+
+    
 }
 
 document.addEventListener('keydown', function(evt) { 
