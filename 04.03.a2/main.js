@@ -1,5 +1,5 @@
 var lienzo=null, canvas=null;
-var x=300,y=50;
+var x=300,y=150;
 
 function iniciar(){
     canvas=document.getElementById('lienzo');
@@ -25,10 +25,18 @@ function pintarLienzo(lienzo){
     
     lienzo.fillStyle="#F7F9FA"; //le ponemos un color al lienzo
     lienzo.fillRect(0,0,canvas.width,canvas.height); //Dibujamos el lienzo
-    lienzo.fillStyle='#000000';
-    lienzo.font = "20px Georgia";
-    lienzo.fillText("Voy a la Izquierda, ¡¡No me gusta la derecha!!", x, y);
-    lienzo.fill();      
+    if (x>=150) {
+        lienzo.fillStyle='#000000';
+        lienzo.font = (20+(x/4))+"px Georgia";
+        lienzo.fillText("Voy a la Izquierda, ¡¡No me gusta la derecha!!", x, y);
+        lienzo.fill();   
+    } else {
+        lienzo.fillStyle='#000000';
+        lienzo.font =   (20-(x/4))+"px Georgia";
+        lienzo.fillText("Voy a la Izquierda, ¡¡No me gusta la derecha!!", x, y);
+        lienzo.fill();   
+    }
+    
 }
 
 document.addEventListener('keydown', function(evt) { 
