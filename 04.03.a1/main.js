@@ -1,21 +1,32 @@
 var lienzo=null, canvas=null;
-var x=50,y=50;
+var x,y; //Posiciones iniciales
 var lastPress=null; //Variable para guardar la tecla presionada
-//En nuestro juego, usaremos las teclas izquierda, arriba, derecha y abajo, cuyos valores numéricos son 37, 38, 39 y 40 respectivamente.
 var KEY_LEFT=37;
 var KEY_UP=38;
 var KEY_RIGHT=39;
 var KEY_DOWN=40;
-var KEY_PAUSE=16; //PAUSA EL JUEGO
-var KEY_RESET=18;
+var KEY_PAUSE=80; //PAUSA EL JUEGO
+var KEY_RESET=82; //RESET ALT GR
 var pausa=false;
 var lastKey=0;
 var gameover=false;
-var obstaculox;
-var obstaculoy;
-var obstaculoh;
-var obstaculow;
 var iniciarobstaculo=true;
+var obstaculos = [];
+var inicio = true;
+var puntos = 0;
+var randx;
+var randy;
+var randw;
+var randh;
+
+
+function Obstaculo( posicionx, posiciony, tamañow, tamañoh) 
+{
+    this.posicionx = posicionx;
+    this.posiciony = posiciony;
+    this.tamañow = tamañow;
+    this.tamañoh = tamañoh;
+}
 
 
 function iniciar(){
@@ -31,76 +42,59 @@ function run(){
 }
 function accionesJuego(){
 
-    //Reiniciar
+    // Posición Inicial
+    if (inicio) {
+        reset();
+        inicio=false;
+    }
+
+    // Reiniciar
     if (lastPress==KEY_RESET) 
     {
-        x=50;
-        y=50;
-
-        KEY_LEFT=37;
-        KEY_UP=38;
-        KEY_RIGHT=39;
-        KEY_DOWN=40;
-
-        pausa=false;
-        gameover=false;
-        iniciarobstaculo=true;
+        reset();
+        //iniciarobstaculo=true;
     }
 
-    if(iniciarobstaculo)
+    if (puntos > 0) 
     {
-    //Generar obstaculo
-    obstaculox= getRandomArbitrary(0,canvas.width)-40;
-    obstaculoy= getRandomArbitrary(0,canvas.height)-40;
-    obstaculoh=40;
-    obstaculow=40;
 
-    iniciarobstaculo=false;
+        for (let i = 0; i < obstaculos.length; i++) 
+        {
+            if ( (x > obstaculos[i].posicionx-10 && x < (obstaculos[i].posicionx+obstaculos[i].tamañow)) && (y > obstaculos[i].posiciony-10 && y < (obstaculos[i].posiciony+obstaculos[i].tamañoh)) ) 
+            {
+                gameOver();
+            }
+        }
+
     }
 
-
-    //Pausa el juego
-    if(lastPress==KEY_PAUSE)
+    // Pausa el juego
+    if(lastPress==KEY_PAUSE && !gameover )
     {
-        
-        if (!pausa) 
-        {
-            lastPress=0;
-            pausa=true;
-            y=y;
-            x=x;
-
-            KEY_LEFT=0;
-            KEY_UP=0;
-            KEY_RIGHT=0;
-            KEY_DOWN=0;
-        }
-        else
-        {
-            lastPress=lastKey;
-            pausa=false;
-
-            KEY_LEFT=37;
-            KEY_UP=38;
-            KEY_RIGHT=39;
-            KEY_DOWN=40;
-        }
-
+        pause();
     } 
 
-    if ( x>=(canvas.width-10) || x<=0 || y>=(canvas.height-10) || y<=0 
-    //|| pausa
-    || ( (x>=obstaculox-10 && x<=obstaculox+40)&&(y>=obstaculoy-10 && y<=obstaculoy+40) ) 
-    ){
+    // limites del canvas
+    if ( x>=(canvas.width-10) || x<=0 || y>=(canvas.height-10) || y<=0 )
+    {
 
-    KEY_LEFT=0;
-    KEY_UP=0;
-    KEY_RIGHT=0;
-    KEY_DOWN=0;
+        gameOver();
 
-    gameover=true;
+    }
 
-    } else {
+    if ( x>=(canvas.width-20) )
+    //canvas.width-10,(canvas.height/2)-40,10,80
+    {
+        puntos++;
+        document.getElementById("puntos").innerHTML = puntos;
+
+        meta();
+        
+    }
+
+    // Movimientos
+    if( !gameover && !pausa )
+    {
         if(lastPress==KEY_RIGHT)
         {
             x+=5;
@@ -125,39 +119,105 @@ function accionesJuego(){
             lastKey=KEY_DOWN;
         }
 
-
     }
  
-
 }
+
 function pintarLienzo(lienzo){
+
+    // Lienzo
     lienzo.fillStyle="#F7F9FA"; //le ponemos un color al lienzo
     lienzo.fillRect(0,0,canvas.width,canvas.height); //Dibujamos el lienzo
+    // Jugador
     lienzo.fillStyle='#0f0';
     lienzo.fillRect(x,y,10,10); //Dibujamos el jugador: va por posición x,y y es de 10x10
+    // Meta
+    lienzo.fillStyle='#0f0';
+    lienzo.fillRect(canvas.width-10,0,10,canvas.height); //Dibujamos el jugador: va por posición x,y y es de 10x10
 
-    lienzo.fillStyle='#8A2BE2';
-    lienzo.fillRect(obstaculox,obstaculoy,40,40);
-    
+    if (puntos > obstaculos.length ) 
+    {
 
-    //
+        randx= getRandomArbitrary(150,canvas.width-80);
+        randy= getRandomArbitrary(0,canvas.height-80);
+        randw= getRandomArbitrary(30,100);
+        randh= getRandomArbitrary(30,100);
+
+        obstaculos.push( new Obstaculo(randx, randy, randw, randh ) ); 
+
+    }
+
+    for (let i = 0; i < obstaculos.length; i++) 
+    {
+        lienzo.fillStyle='#8A2BE2';
+        lienzo.fillRect(obstaculos[i].posicionx, obstaculos[i].posiciony, obstaculos[i].tamañow, obstaculos[i].tamañoh); 
+    }
+
     if(gameover)
     {
         lienzo.fillStyle='#FF0000';
         lienzo.font = "30px Georgia";
         lienzo.fillText("GAMEOVER", (canvas.width/2)-90, canvas.height/2);
-        //lienzo.fill();
     }
-    else if(pausa)
+
+    if(pausa)
     {
         lienzo.fillStyle='#FF0000';
         lienzo.font = "30px Georgia";
         lienzo.fillText("PAUSA", (canvas.width/2)-50, canvas.height/2);
     }
     
+    
 }
+
 function getRandomArbitrary(min, max) {
     return Math.random() * (max - min) + min;
+}
+
+function reset()
+{
+    x = 50;
+    y = (canvas.height/2)-10;
+
+    lastKey=0;
+
+    pausa=false;
+    gameover=false;
+
+    lastPress=0;
+
+    puntos=0;
+    document.getElementById("puntos").innerHTML = puntos;
+    
+    obstaculos=[];
+}
+
+function meta()
+{
+    x = 50;
+    y = (canvas.height/2)-10;
+
+    lastKey=0;
+    lastPress=0;
+}
+
+function pause()
+{
+    if (pausa) 
+    {
+        pausa=false;
+        lastPress=lastKey;
+    }
+    else
+    {
+        lastPress=0;
+        pausa=true;
+    }
+}
+
+function gameOver()
+{
+    gameover=true;
 }
 
 
